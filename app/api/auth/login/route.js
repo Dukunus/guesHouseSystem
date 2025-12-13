@@ -25,7 +25,7 @@ export async function POST(req) {
       return NextResponse.json({ error: "Нууц үг буруу" }, { status: 400 });
     }
 
-    // ✅ JWT TOKEN үүсгэх
+    //  JWT TOKEN үүсгэх
     const token = jwt.sign(
       { 
         userId: user._id,
@@ -43,13 +43,13 @@ export async function POST(req) {
       role: user.role
     };
 
-    // ✅ Response үүсгэж cookie тохируулах
+    //  Response үүсгэж cookie тохируулах
     const response = NextResponse.json({ 
       success: true,
       user: safeUser 
     }, { status: 200 });
 
-    // ✅ HTTP-only cookie-д token хадгалах
+    //  HTTP-only cookie-д token хадгалах
     response.cookies.set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
