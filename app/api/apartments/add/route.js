@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 import Apartment from "@/models/Apartment";
 import { connectDB } from "@/data/mongodb";
 
-export async function POST(req) {
+export async function POST(_req) {
  try {
     await connectDB();
-    const body = await req.json();
+    const body = await _req.json();
 
     const apartment = await Apartment.create({
       title: body.title,

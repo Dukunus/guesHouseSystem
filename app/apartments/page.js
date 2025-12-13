@@ -35,6 +35,7 @@ export default function ApartmentsPage() {
           <img
             src={apt.image || "/no-photo.jpg"}
             className="w-full h-48 object-cover"
+             alt="Байрын зураг" 
             onError={(e) => (e.currentTarget.src = "/no-photo.jpg")}
           />
 

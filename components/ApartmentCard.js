@@ -1,7 +1,8 @@
+import Image from "next/image";
 export default function ApartmentCard({ apt }) {
 return (
 <div className="p-4 bg-white rounded-xl shadow">
-<img
+<Image
 src={apt.imageUrl}
 alt={apt.title}
 className="w-full h-40 object-cover rounded-lg mb-3"

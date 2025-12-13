@@ -26,6 +26,7 @@ export default function ApartmentDetail() {
 
       <img
         src={apartment.image || "/no-photo.jpg"}
+         alt="Байрын зураг" 
         className="w-full h-80 object-cover rounded-lg shadow"
       />
 
