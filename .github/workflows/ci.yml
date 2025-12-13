@@ -38,8 +38,8 @@ jobs:
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         NODE_ENV: test
 
-    - name: Tests ажиллуулах (хэрэв байвал)
-      run: npm test
+    - name: Tests ажиллуулах 
+      run: npm run test:ci
       continue-on-error: true
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
