@@ -3,6 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ApartmentProvider } from "@/context/ApartmentContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Home from "./home/page";
 export const metadata = {
   title: "Хялбар Түрээс",
   description: "Богино болон дунд хугацааны байр түрээсийн платформ",
@@ -16,7 +17,7 @@ export default function RootLayout({ children }) {
           <ApartmentProvider>
             <Navbar />
             <div className="max-w-7xl mx-auto px-4 py-6">
-
+            
             {children}
             </div>
             <Footer/>

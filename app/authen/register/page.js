@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation"; // ✅ useRouter import хийх
 
 export default function RegisterPage() {
   const { register } = useAuth();
+  const router = useRouter(); // ✅ router үүсгэх
 
   const [form, setForm] = useState({
     name: "",
@@ -19,12 +21,15 @@ export default function RegisterPage() {
     setLoading(true);
     setMsg("");
 
-    const res = await register(form);
+    const success = await register(form); 
 
-    if (res?.error) {
-      setMsg(res.error);
-    } else {
+    if (success) {
       setMsg("Бүртгэл амжилттай!");
+      setTimeout(() => {
+        router.push("/login");
+      }, 1000);
+    } else {
+      setMsg("Бүртгэл амжилтгүй. Дахин оролдоно уу.");
     }
 
     setLoading(false);
@@ -75,6 +80,13 @@ export default function RegisterPage() {
             </p>
           )}
         </div>
+
+        <p className="text-center mt-6 text-gray-600">
+          Аль хэдийн бүртгэлтэй юу?{" "}
+          <a href="/authen/login" className="text-blue-600 hover:underline font-medium">
+            Нэвтрэх
+          </a>
+        </p>
       </div>
     </div>
   );

@@ -2,13 +2,37 @@
 
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import { Home, Search, Plus, User, LogIn, UserPlus, MapPin, Star, Calendar } from 'lucide-react';
+import { useRouter } from "next/navigation";
+import { Home, Search, Plus, User, LogIn, UserPlus, LogOut } from 'lucide-react';
 
 export default function Navbar() {
-  const { currentUser } = useAuth();
+  const { currentUser, loading, logout } = useAuth();
+  const router = useRouter();
+
+  // Loading үед хоосон navbar харуулах
+  if (loading) {
+    return (
+      <nav className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <a href="/" className="flex items-center space-x-2">
+              <Home className="w-6 h-6 text-blue-600" />
+              <span className="text-xl font-bold text-blue-600">Хялбар Түрээс</span>
+            </a>
+            <div className="text-gray-400">Ачааллаж байна...</div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/"); // Нүүр хуудас руу шилжүүлэх
+  };
 
   return (
-     <nav className="bg-white shadow-sm border-b border-gray-200">
+    <nav className="bg-white shadow-sm border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <a href="/" className="flex items-center space-x-2">
@@ -44,9 +68,18 @@ export default function Navbar() {
                 </a>
               </div>
             ) : (
-              <div className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg">
-                <User className="w-4 h-4 text-gray-600" />
-                <span className="font-medium text-gray-700">{currentUser.name}</span>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg">
+                  <User className="w-4 h-4 text-gray-600" />
+                  <span className="font-medium text-gray-700">{currentUser.name}</span>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-red-600 transition flex items-center space-x-1 px-3 py-2 rounded-lg hover:bg-red-50"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Гарах</span>
+                </button>
               </div>
             )}
           </div>

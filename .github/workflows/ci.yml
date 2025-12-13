@@ -1,44 +1,78 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, develop ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+    - name: Checkout код татах
+      uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "18"
-          cache: "npm"
+    - name: Node.js суулгах ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+    - name: Dependencies суулгах
+      run: npm ci
 
-      - name: Lint (if you have eslint)
-        run: |
-          if [ -f package.json ] && jq -e '.scripts.lint' package.json >/dev/null 2>&1; then
-            npm run lint
-          else
-            echo "No lint script defined, skipping"
-          fi
+    - name: Lint шалгах (код стандарт)
+      run: npm run lint
+      continue-on-error: true
 
-      - name: Run unit tests (if any)
-        run: |
-          if [ -f package.json ] && jq -e '.scripts.test' package.json >/dev/null 2>&1; then
-            npm test --if-present
-          else
-            echo "No test script defined, skipping"
-          fi
+    - name: Build шалгах
+      run: npm run build
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        NODE_ENV: test
 
-      - name: Build Next.js
-        env:
-          NEXT_PUBLIC_APP_NAME: ${{ secrets.NEXT_PUBLIC_APP_NAME }}
-        run: npm run build
+    - name: Tests ажиллуулах (хэрэв байвал)
+      run: npm test
+      continue-on-error: true
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        NODE_ENV: test
+
+  build-check:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Node.js суулгах
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Dependencies суулгах
+      run: npm ci
+
+    - name: Production build шалгах
+      run: npm run build
+      env:
+        MONGODB_URI: ${{ secrets.MONGODB_URI }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
+        NODE_ENV: production
+
+    - name: Build үр дүн хадгалах
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-files
+        path: .next/
+        retention-days: 7

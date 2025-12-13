@@ -36,7 +36,7 @@ export default function AddApartmentPage() {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white shadow p-8 mt-10 rounded-lg">
+    <div className="max-w-xl mx-auto bg-white text-gray-600 shadow p-8 mt-10 rounded-lg">
       <h2 className="text-2xl font-bold mb-4">Байр нэмэх</h2>
 
       <form className="space-y-4" onSubmit={handleSubmit}>

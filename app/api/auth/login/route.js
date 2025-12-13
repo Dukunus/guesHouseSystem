@@ -1,13 +1,15 @@
+// app/api/auth/login/route.js
 import { NextResponse } from "next/server";
 import { connectDB } from "@/data/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 
 export async function POST(req) {
   try {
-   
     await connectDB();
-   
 
     const { email, password } = await req.json();
     const user = await User.findOne({ email });
@@ -16,7 +18,6 @@ export async function POST(req) {
       return NextResponse.json({ error: "Ийм имэйл бүртгэлгүй байна" }, { status: 400 });
     }
 
-    // ХЭРЭГЛЭГЧИЙН ОРУУЛСАН PASSWORD ХЭШТЭЙ ТЭНЦЭЖ БАЙГААГ ШАЛГАХ
     const isMatch = bcrypt.compareSync(password, user.password);
     console.log(">>> Password match:", isMatch);
 
@@ -24,7 +25,17 @@ export async function POST(req) {
       return NextResponse.json({ error: "Нууц үг буруу" }, { status: 400 });
     }
 
-    // Амжилттай нэвтэрлээ → password-г буцаахгүй
+    // ✅ JWT TOKEN үүсгэх
+    const token = jwt.sign(
+      { 
+        userId: user._id,
+        email: user.email,
+        role: user.role 
+      },
+      JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
     const safeUser = {
       _id: user._id,
       name: user.name,
@@ -32,7 +43,22 @@ export async function POST(req) {
       role: user.role
     };
 
-    return NextResponse.json({ user: safeUser }, { status: 200 });
+    // ✅ Response үүсгэж cookie тохируулах
+    const response = NextResponse.json({ 
+      success: true,
+      user: safeUser 
+    }, { status: 200 });
+
+    // ✅ HTTP-only cookie-д token хадгалах
+    response.cookies.set("auth-token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 хоног
+      path: "/"
+    });
+
+    return response;
 
   } catch (err) {
     console.error("LOGIN API ERROR:", err);
