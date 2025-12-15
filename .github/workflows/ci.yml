@@ -38,13 +38,20 @@ jobs:
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         NODE_ENV: test
 
-    - name: Tests ажиллуулах 
+    - name: Unit Tests ажиллуулах
       run: npm run test:ci
-      continue-on-error: true
       env:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         NODE_ENV: test
+
+    - name: Test Coverage Upload
+      uses: codecov/codecov-action@v4
+      if: success()
+      with:
+        files: ./coverage/lcov.info
+        flags: unittests
+      continue-on-error: true
 
   build-check:
     runs-on: ubuntu-latest
