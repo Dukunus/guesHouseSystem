@@ -45,6 +45,8 @@ jobs:
         MONGODB_URI: ${{ secrets.MONGODB_URI }}
         JWT_SECRET: ${{ secrets.JWT_SECRET }}
         NODE_ENV: test
+    - name: Integration tests
+      run: npm test
 
   build-check:
     runs-on: ubuntu-latest

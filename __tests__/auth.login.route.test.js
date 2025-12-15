@@ -55,7 +55,7 @@ describe("POST /api/auth/login (TDD)", () => {
     expect(data.user.email).toBe("test@mail.com");
   });
 
-  test(" Имэйл олдохгүй бол 400 буцаах", async () => {
+  test(" Имэйл олдохгүй бол 404 буцаах", async () => {
     connectDB.mockResolvedValue(true);
     User.findOne.mockResolvedValue(null);
 
@@ -69,11 +69,11 @@ describe("POST /api/auth/login (TDD)", () => {
     const res = await POST(req);
     const data = await res.json();
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(404);
     expect(data.error).toBe("Ийм имэйл бүртгэлгүй байна");
   });
 
-  test(" Нууц үг буруу бол 400 буцаах", async () => {
+  test(" Нууц үг буруу бол 401 буцаах", async () => {
     const fakeUser = {
       email: "test@mail.com",
       password: "hashedpass",
@@ -93,7 +93,7 @@ describe("POST /api/auth/login (TDD)", () => {
     const res = await POST(req);
     const data = await res.json();
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
     expect(data.error).toBe("Нууц үг буруу");
   });
 });

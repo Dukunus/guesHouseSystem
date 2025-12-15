@@ -26,7 +26,7 @@ export default function RegisterPage() {
     if (success) {
       setMsg("Бүртгэл амжилттай!");
       setTimeout(() => {
-        router.push("/login");
+        router.push("/");
       }, 1000);
     } else {
       setMsg("Бүртгэл амжилтгүй. Дахин оролдоно уу.");

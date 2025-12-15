@@ -4,7 +4,7 @@ import { connectDB } from "@/data/mongodb";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-
+import AppError from "@/lib/errors/AppError";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key-change-this";
 
 export async function POST(req) {
@@ -12,20 +12,24 @@ export async function POST(req) {
     await connectDB();
 
     const { email, password } = await req.json();
+    
+    if (!email || !password) {
+      throw new AppError("Имэйл болон нууц үг шаардлагатай", 400);
+    }
+    
     const user = await User.findOne({ email });
-
+    
     if (!user) {
-      return NextResponse.json({ error: "Ийм имэйл бүртгэлгүй байна" }, { status: 400 });
+      throw new AppError("Ийм имэйл бүртгэлгүй байна", 404);
     }
 
     const isMatch = bcrypt.compareSync(password, user.password);
-    console.log(">>> Password match:", isMatch);
-
+    
     if (!isMatch) {
-      return NextResponse.json({ error: "Нууц үг буруу" }, { status: 400 });
+      throw new AppError("Нууц үг буруу", 401);
     }
 
-    //  JWT TOKEN үүсгэх
+    // JWT TOKEN үүсгэх
     const token = jwt.sign(
       { 
         userId: user._id,
@@ -43,13 +47,13 @@ export async function POST(req) {
       role: user.role
     };
 
-    //  Response үүсгэж cookie тохируулах
+    // Response үүсгэж cookie тохируулах
     const response = NextResponse.json({ 
       success: true,
       user: safeUser 
     }, { status: 200 });
 
-    //  HTTP-only cookie-д token хадгалах
+    // HTTP-only cookie-д token хадгалах
     response.cookies.set("auth-token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -57,11 +61,24 @@ export async function POST(req) {
       maxAge: 60 * 60 * 24 * 7, // 7 хоног
       path: "/"
     });
-
+    
     return response;
 
   } catch (err) {
     console.error("LOGIN API ERROR:", err);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+
+    // AppError бол тухайн статус код болон мессежийг буцаах
+    if (err instanceof AppError) {
+      return NextResponse.json(
+        { error: err.message },
+        { status: err.statusCode }
+      );
+    }
+
+    // Бусад алдаа бол 500 буцаах
+    return NextResponse.json(
+      { error: "Server error" },
+      { status: 500 }
+    );
   }
 }
